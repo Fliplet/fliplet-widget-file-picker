@@ -233,7 +233,7 @@ function getFileTemplate(file) {
   var template;
   switch (type) {
     case 'image':
-      file.urlSmall = file.thumbnail || Fliplet.Env.get('apiUrl') + 'v1/media/files/' + file.id + '/contents?size=small';
+      file.urlSmall = Fliplet.Media.authenticate(file.thumbnail || file.url);
       template = templates.image(file);
       break;
     case 'video':
