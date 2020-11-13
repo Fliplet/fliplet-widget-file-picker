@@ -347,7 +347,8 @@ $(document)
           appId: Fliplet.Env.get('appId'),
           folder: navStack.tempStack[navStack.tempStack.length - 1],
           navStack: navStack
-        }
+        },
+        helpLink: 'https://help.fliplet.com/selecting-files/'
       }
     });
   });
