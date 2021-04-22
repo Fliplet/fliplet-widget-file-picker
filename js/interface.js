@@ -341,7 +341,7 @@ $(document)
     navStack.upTo = cleanNavStack();
     navStack.upTo.pop(); // Remove last one
 
-    initFileManagerOverlay(navStack)
+    initFileManagerOverlay(navStack);
   });
 
 function sortByName(item1, item2) {
@@ -389,7 +389,7 @@ function getOrganizations() {
 function deleteConfirmation(type, id) {
   var sourceType = type === 'folder'
     ? 'folders'
-    : 'files'
+    : 'files';
 
   return new Promise(function(resolve, reject) {
     Fliplet.Modal.confirm({
@@ -640,14 +640,14 @@ function restoreItem(type, id) {
   var url = 'v1/media/' + type + '/' + id + '/restore';
   var restoredItemType = type === 'folders'
   ? 'Folder'
-  : 'File'
+  : 'File';
 
   return Fliplet.API.request({
     url: url,
-    method: 'POST',
+    method: 'POST'
   }).then(function() {
     Fliplet.Modal.alert({
-      message: restoredItemType + ' restored from Trash.',
+      message: restoredItemType + ' restored from Trash.'
     });
   }).catch(function(error) {
     Fliplet.Modal.confirm({
@@ -664,14 +664,16 @@ function restoreItem(type, id) {
         }
       }
     }).then(function(result) {
-      if (!result) {
-        var navStack = {};
-        navStack.tempStack = cleanNavStack();
-        navStack.upTo = cleanNavStack();
-        navStack.upTo.pop(); // Remove last one
-
-        initFileManagerOverlay(navStack);
+      if (result) {
+        return;
       }
+
+      var navStack = {};
+      navStack.tempStack = cleanNavStack();
+      navStack.upTo = cleanNavStack();
+      navStack.upTo.pop(); // Remove last one
+
+      initFileManagerOverlay(navStack);
     });
   })
 }
