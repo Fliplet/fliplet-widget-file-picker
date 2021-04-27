@@ -300,7 +300,7 @@ $(document)
       }
 
       Fliplet.Media.Files.delete(fileID).then(function() {
-        deleteConfirmation('file', fileID).then(function() {
+        displayDeletionConfirmation('file', fileID).then(function() {
           $elementToDelete.remove();
 
           _.remove(files, { id: fileID });
@@ -325,7 +325,7 @@ $(document)
       }
 
       Fliplet.Media.Folders.delete(folderID).then(function() {
-        deleteConfirmation('folder', folderID).then(function() {
+        displayDeletionConfirmation('folder', folderID).then(function() {
           $elementToDelete.remove();
 
           _.remove(folders, { id: folderID });
@@ -336,7 +336,9 @@ $(document)
   })
   .on('click', '.browse-files', function(e) {
     e.preventDefault();
+
     var navStack = {};
+
     navStack.tempStack = cleanNavStack();
     navStack.upTo = cleanNavStack();
     navStack.upTo.pop(); // Remove last one
@@ -386,13 +388,12 @@ function getOrganizations() {
     });
 }
 
-function deleteConfirmation(type, id) {
+function displayDeletionConfirmation(type, id) {
   var sourceType = type === 'folder'
     ? 'folders'
     : 'files';
 
-  return new Promise(function(resolve, reject) {
-    Fliplet.Modal.confirm({
+    return Fliplet.Modal.confirm({
       title: 'Moved to Trash',
       message: 'You can access the deleted ' + type + ' in <b>File Manager > Trash</b>',
       buttons: {
@@ -408,12 +409,7 @@ function deleteConfirmation(type, id) {
     }).then(function(deleteResult) {
       if (!deleteResult) {
         restoreItem(sourceType, id);
-        
-        reject();
       }
-  
-      resolve();
-    });
   });
 }
 
@@ -669,13 +665,14 @@ function restoreItem(type, id) {
       }
 
       var navStack = {};
+
       navStack.tempStack = cleanNavStack();
       navStack.upTo = cleanNavStack();
       navStack.upTo.pop(); // Remove last one
 
       initFileManagerOverlay(navStack);
     });
-  })
+  });
 }
 
 function restoreFolders(id, appId, organizationId) {
