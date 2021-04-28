@@ -300,10 +300,13 @@ $(document)
       }
 
       Fliplet.Media.Files.delete(fileID).then(function() {
-        $elementToDelete.remove();
+        displayDeletionConfirmation('file', fileID).then(function() {
+          $elementToDelete.remove();
+
+          _.remove(files, { id: fileID });
+        });
       });
 
-      _.remove(files, { id: fileID });
     });
   })
   .on('click', '.delete-folder', function() {
@@ -322,35 +325,25 @@ $(document)
       }
 
       Fliplet.Media.Folders.delete(folderID).then(function() {
-        $elementToDelete.remove();
+        displayDeletionConfirmation('folder', folderID).then(function() {
+          $elementToDelete.remove();
+
+          _.remove(folders, { id: folderID });
+        });
       });
 
-      _.remove(folders, { id: folderID });
     });
   })
   .on('click', '.browse-files', function(e) {
     e.preventDefault();
+
     var navStack = {};
+
     navStack.tempStack = cleanNavStack();
     navStack.upTo = cleanNavStack();
     navStack.upTo.pop(); // Remove last one
 
-    Fliplet.Studio.emit('overlay', {
-      name: 'widget',
-      options: {
-        size: 'large',
-        package: 'com.fliplet.file-manager',
-        title: 'File Manager',
-        classes: 'data-source-overlay',
-        data: {
-          context: 'overlay',
-          appId: Fliplet.Env.get('appId'),
-          folder: navStack.tempStack[navStack.tempStack.length - 1],
-          navStack: navStack
-        },
-        helpLink: 'https://help.fliplet.com/selecting-files/'
-      }
-    });
+    initFileManagerOverlay(navStack);
   });
 
 function sortByName(item1, item2) {
@@ -368,12 +361,56 @@ function getApps() {
     });
 }
 
+function initFileManagerOverlay(navStack) {
+  Fliplet.Studio.emit('overlay', {
+    name: 'widget',
+    options: {
+      size: 'large',
+      package: 'com.fliplet.file-manager',
+      title: 'File Manager',
+      classes: 'data-source-overlay',
+      data: {
+        context: 'overlay',
+        appId: Fliplet.Env.get('appId'),
+        folder: navStack.tempStack[navStack.tempStack.length - 1],
+        navStack: navStack
+      },
+      helpLink: 'https://help.fliplet.com/selecting-files/'
+    }
+  });
+}
+
 function getOrganizations() {
   return Fliplet.Organizations
     .get()
     .then(function(organizations) {
       return organizations;
     });
+}
+
+function displayDeletionConfirmation(type, id) {
+  var sourceType = type === 'folder'
+    ? 'folders'
+    : 'files';
+
+    return Fliplet.Modal.confirm({
+      title: 'Moved to Trash',
+      message: 'You can access the deleted ' + type + ' in <b>File Manager > Trash</b>',
+      buttons: {
+        cancel: {
+          label: 'Undo',
+          className: 'btn-default'
+        },
+        confirm: {
+          label: 'OK',
+          className: 'btn-primary'
+        }
+      }
+    }).then(function(deleteResult) {
+      if (!deleteResult) {
+        restoreItem(sourceType, id);
+      }
+  });
 }
 
 function openFolder(folderId) {
@@ -593,6 +630,49 @@ function restoreRoot(appId, organizationId) {
   }
 
   return Promise.resolve();
+}
+
+function restoreItem(type, id) {
+  var url = 'v1/media/' + type + '/' + id + '/restore';
+  var restoredItemType = type === 'folders'
+  ? 'Folder'
+  : 'File';
+
+  return Fliplet.API.request({
+    url: url,
+    method: 'POST'
+  }).then(function() {
+    Fliplet.Modal.alert({
+      message: restoredItemType + ' restored from Trash.'
+    });
+  }).catch(function(error) {
+    Fliplet.Modal.confirm({
+      title: restoredItemType +' restore failed',
+      message: Fliplet.parseError(error),
+      buttons: {
+        cancel: {
+          label: 'Go to Trash',
+          className: 'btn-default'
+        },
+        confirm: {
+          label: 'OK',
+          className: 'btn-primary'
+        }
+      }
+    }).then(function(result) {
+      if (result) {
+        return;
+      }
+
+      var navStack = {};
+
+      navStack.tempStack = cleanNavStack();
+      navStack.upTo = cleanNavStack();
+      navStack.upTo.pop(); // Remove last one
+
+      initFileManagerOverlay(navStack);
+    });
+  });
 }
 
 function restoreFolders(id, appId, organizationId) {
