@@ -409,6 +409,8 @@ function displayDeletionConfirmation(type, id) {
     }).then(function(deleteResult) {
       if (!deleteResult) {
         restoreItem(sourceType, id);
+
+        return Promise.reject();
       }
   });
 }
