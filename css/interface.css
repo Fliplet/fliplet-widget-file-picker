@@ -3,11 +3,6 @@ html {
   overflow-x: auto;
 }
 
-html.provider-inline,
-html.provider-inline body {
-  height: auto;
-}
-
 .holder {
   position: relative;
   width: 100%;
@@ -16,11 +11,6 @@ html.provider-inline body {
 
 #app {
   overflow: auto;
-}
-
-html.provider-inline #app {
-  height: auto;
-  max-height: none;
 }
 
 html.provider-inline header {
