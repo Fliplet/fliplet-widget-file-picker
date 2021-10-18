@@ -23,7 +23,7 @@ Fliplet.Widget.toggleSaveButton(data.selectFiles.length);
 if (!Array.isArray(data.selectFiles)) data.selectFiles = [data.selectFiles];
 data.fileExtension = data.fileExtension || [];
 data.selectMultiple = data.selectMultiple || false;
-data.allowOrganisationFolder = data.allowOrganisationFolder !== false;
+data.allowOrganizationFolder = data.allowOrganizationFolder !== false;
 if (!(data.selectMultiple && data.selectFiles.length > 1) && !data.selectFiles) data.selectFiles = [data.selectFiles[0]];
 
 if (data.type === 'folder') {
@@ -967,27 +967,27 @@ function init() {
     getApps()
   ])
     .then(function(values) {
-      var userOrganisations = values[0];
+      var userOrganizations = values[0];
       var userApps = values[1];
-      let dropDownHtml = [];
-      var thisOrganisation = _.find(userOrganisations, function(org) {
+      var dropDownHtml = [];
+      var thisOrganization = _.find(userOrganizations, function(org) {
         return org.id === Fliplet.Env.get('organizationId');
       });
       var thisApp = _.find(userApps, function(app) {
         return app.id === Fliplet.Env.get('appId');
       });
 
-      // Organisations
-      if (thisOrganisation) {
-        if (data.allowOrganisationFolder) {
-          dropDownHtml.push('<optgroup label="--- Organisation ---">');
-          dropDownHtml.push('<option value="org_' + thisOrganisation.id + '">' + thisOrganisation.name + '</option>');
+      // Organizations
+      if (thisOrganization) {
+        if (data.allowOrganizationFolder) {
+          dropDownHtml.push('<optgroup label="--- Organization ---">');
+          dropDownHtml.push('<option value="org_' + thisOrganization.id + '">' + thisOrganization.name + '</option>');
           dropDownHtml.push('</optgroup>');
         }
 
         organizations.push({
-          id: thisOrganisation.id,
-          name: thisOrganisation.name
+          id: thisOrganization.id,
+          name: thisOrganization.name
         });
       }
 
