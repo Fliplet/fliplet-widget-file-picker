@@ -159,6 +159,12 @@ body.folderOnly .helper {
   flex: 1;
 }
 
+.storage-holder .storage-progress-wrapper p {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .image-library {
   display: flex;
   justify-content: flex-start;
