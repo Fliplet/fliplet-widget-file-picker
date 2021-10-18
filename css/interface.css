@@ -98,8 +98,6 @@ html.provider-inline header {
   line-height: 44px;
 }
 
-.gallery-tool.with-tools {}
-
 .gallery-tool .back-btn {
   padding: 0 0 0 34px;
   position: relative;
@@ -145,14 +143,10 @@ body.folderOnly .helper {
 .storage-holder {
   display: flex;
   flex-flow: row nowrap;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 10;
   background-color: #f8f6f7;
-  padding: 15px;
-  border-top: 1px solid rgba(51, 51, 51, 0.1);
+  padding: 0 15px 15px;
+  margin-bottom: 15px;
+  border-bottom: 1px solid rgba(51, 51, 51, 0.1);
 }
 
 .storage-holder .storage-progress-wrapper {
@@ -597,6 +591,7 @@ body.folderOnly .drop-note {
 
 #app header {
   padding: 10px 15px;
+  margin-bottom: 15px;
 }
 
 .image-holder:hover .image-overlay,
