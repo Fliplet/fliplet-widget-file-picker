@@ -1,16 +1,25 @@
 body,
 html {
-  overflow-x: auto;
+  overflow-x: hidden;
+  height: 100%;
 }
 
 .holder {
   position: relative;
   width: 100%;
   min-height: 135px;
+  /* 300px => size of all elements surrounding the .holder */
+  height: calc(100% - 300px);
+  overflow: auto;
+}
+
+html.provider-inline .holder {
+  /* 242px => size of all elements surrounding the .holder */
+  height: calc(100% - 242px);
 }
 
 #app {
-  overflow: auto;
+  height: 100%;
 }
 
 html.provider-inline header {
@@ -157,8 +166,6 @@ body.folderOnly .helper {
   display: flex;
   justify-content: flex-start;
   flex-flow: wrap;
-  padding-top: 15px;
-  margin-bottom: 5px;
 }
 
 .image-library .nofiles-msg {
@@ -610,18 +617,9 @@ body.folderOnly .drop-note {
   position: relative;
 }
 
-.holder {
-  overflow-y: auto;
-}
-
 .menu-fixed .form-group {
   margin-bottom: 0;
-}
-
-.holder:after {
-  content: "";
-  display: block;
-  margin-bottom: 110px;
+  margin-bottom: 10px;
 }
 
 .dropdown-menu {
