@@ -387,9 +387,9 @@ function sortByName(item1, item2) {
 }
 
 
-function getApps() {
+function getApps(options) {
   return Fliplet.Apps
-    .get()
+    .get(options)
     .then(function(apps) {
       return apps.sort(sortByName).filter(function(app) {
         return !app.legacy;
@@ -1229,6 +1229,7 @@ function uploadFiles(files) {
   var confirmedType;
   var confirmedExt;
   var formData = new FormData();
+
   for (var i = 0; i < files.length; i++) {
     var fileName = files[i].name;
     var dotIndex = fileName.lastIndexOf('.');
@@ -1292,6 +1293,7 @@ function uploadFiles(files) {
       if (files.length) {
         addFilesToCurrentFiles(files);
       }
+
       if (data.autoSelectOnUpload) {
         files.forEach(function(file) {
           if (selectAvailable) {
@@ -1299,9 +1301,23 @@ function uploadFiles(files) {
           }
         });
       }
+
       hideProgressBar();
+
+      return getApps({
+        cache: false
+      });
     })
-    .then(function() {}, handleUploadingError);
+    .then(function (apps) {
+      // Updated list to update the storage usage values
+      userApps = apps;
+
+      var value = $fileDropDown.val().split('_');
+      var appId = parseInt(value[1], 10);
+
+      toggleStorageUsage(appId);
+    })
+    .catch(handleUploadingError);
 }
 
 function handleUploadingError() {
