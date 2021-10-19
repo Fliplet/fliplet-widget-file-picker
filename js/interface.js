@@ -188,6 +188,21 @@ Object.keys(extensionDictionary).forEach(function(key) {
   });
 });
 
+// Formats the file size from bytes
+function formatBytes(bytes, decimals = 2) {
+  if (bytes === 0) {
+    return '0 Bytes';
+  }
+
+  var k = 1024;
+  var dm = decimals < 0 ? 0 : decimals;
+  var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+  var i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+}
+
 function getFilteredType(extension) {
   var fileExtension = _.find(validExtensions, function(valid) {
     return valid.ext === extension;
@@ -372,9 +387,9 @@ function sortByName(item1, item2) {
 }
 
 
-function getApps() {
+function getApps(options) {
   return Fliplet.Apps
-    .get()
+    .get(options)
     .then(function(apps) {
       return apps.sort(sortByName).filter(function(app) {
         return !app.legacy;
@@ -1214,6 +1229,7 @@ function uploadFiles(files) {
   var confirmedType;
   var confirmedExt;
   var formData = new FormData();
+
   for (var i = 0; i < files.length; i++) {
     var fileName = files[i].name;
     var dotIndex = fileName.lastIndexOf('.');
@@ -1277,6 +1293,7 @@ function uploadFiles(files) {
       if (files.length) {
         addFilesToCurrentFiles(files);
       }
+
       if (data.autoSelectOnUpload) {
         files.forEach(function(file) {
           if (selectAvailable) {
@@ -1284,9 +1301,23 @@ function uploadFiles(files) {
           }
         });
       }
+
       hideProgressBar();
+
+      return getApps({
+        cache: false
+      });
     })
-    .then(function() {}, handleUploadingError);
+    .then(function (apps) {
+      // Updated list to update the storage usage values
+      userApps = apps;
+
+      var value = $fileDropDown.val().split('_');
+      var appId = parseInt(value[1], 10);
+
+      toggleStorageUsage(appId);
+    })
+    .catch(handleUploadingError);
 }
 
 function handleUploadingError() {
