@@ -453,7 +453,7 @@ function displayDeletionConfirmation(type, id) {
 
 function toggleStorageUsage(appId) {
   // Show or hide the storage usage UI
-  $('.storage-holder')[appId ? 'removeClass' : 'addClass']('hidden');
+  $('.storage-holder').toggleClass('hidden', !appId);
 
   if (!appId) {
     return;
@@ -482,10 +482,7 @@ function toggleStorageUsage(appId) {
     .indexOf(organizationPlan.name) < 0
 
   // Toggle progress bar and upgrade button
-  $('.storage-holder .btn-upgrade')[!organizationIsSelfServe || isPaidApp
-    ? 'addClass'
-    : 'removeClass'
-  ]('hidden');
+  $('.storage-holder .btn-upgrade').toggleClass('hidden', !organizationIsSelfServe || !!isPaidApp);
 
   // Update the UI to show the storage usage
   $('.storage-holder .storage-progress-wrapper p span').text(selectedApp.name);
@@ -541,7 +538,7 @@ function openApp(appId) {
     });
 }
 
-function openOrganization (organizationId) {
+function openOrganization(organizationId) {
   $spinnerHolder.removeClass('hidden');
   $('.holder.container-fluid').addClass('is-organization');
 
