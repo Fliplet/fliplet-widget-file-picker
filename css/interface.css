@@ -18,6 +18,16 @@ html.provider-inline .holder {
   height: calc(100% - 242px);
 }
 
+.holder.is-organization {
+  /* 219px => size of all elements surrounding the .holder */
+  height: calc(100% - 219px);
+}
+
+html.provider-inline .holder.is-organization {
+  /* 161px => size of all elements surrounding the .holder */
+  height: calc(100% - 161px);
+}
+
 #app {
   height: 100%;
 }

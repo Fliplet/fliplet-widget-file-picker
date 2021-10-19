@@ -519,6 +519,8 @@ function openFolder(folderId) {
 
 function openApp(appId) {
   $spinnerHolder.removeClass('hidden');
+  $('.holder.container-fluid').removeClass('is-organization');
+
   opening = {
     type: 'app',
     id: appId
@@ -539,8 +541,10 @@ function openApp(appId) {
     });
 }
 
-function openOrganization(organizationId) {
+function openOrganization (organizationId) {
   $spinnerHolder.removeClass('hidden');
+  $('.holder.container-fluid').addClass('is-organization');
+
   opening = {
     type: 'organization',
     id: organizationId
