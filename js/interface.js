@@ -387,13 +387,29 @@ function sortByName(item1, item2) {
 }
 
 
-function getApps(options) {
+function getApps() {
   return Fliplet.Apps
-    .get(options)
+    .get()
     .then(function(apps) {
       return apps.sort(sortByName).filter(function(app) {
         return !app.legacy;
       });
+    });
+}
+
+function getAppById(appId) {
+  return Fliplet.API.request('v1/apps/' + appId);
+}
+
+function updateAppMetrics(appId) {
+  return getAppById(appId)
+    .then(function(result) {
+      var updatedApp = result.app;
+      var appIndex = userApps.findIndex(function(app) {
+        return app.id === updatedApp.id;
+      });
+
+      userApps[appIndex].metrics = updatedApp.metrics;
     });
 }
 
@@ -1289,6 +1305,9 @@ function uploadFiles(files) {
   hideDropZone();
   showProgressBar();
 
+  var value = $fileDropDown.val().split('_');
+  var appId = parseInt(value[1], 10);
+
   Fliplet.Media.Files.upload(config)
     .then(function(files) {
       if (files.length) {
@@ -1305,17 +1324,13 @@ function uploadFiles(files) {
 
       hideProgressBar();
 
-      return getApps({
-        cache: false
-      });
+      if (!appId) {
+        return;
+      }
+
+      return updateAppMetrics(appId);
     })
-    .then(function (apps) {
-      // Updated list to update the storage usage values
-      userApps = apps;
-
-      var value = $fileDropDown.val().split('_');
-      var appId = parseInt(value[1], 10);
-
+    .then(function() {
       toggleStorageUsage(appId);
     })
     .catch(handleUploadingError);
