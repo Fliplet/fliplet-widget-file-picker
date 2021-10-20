@@ -11,6 +11,7 @@ var $progressLine = $('#progress-line');
 var $progressBarWrapper = $('#progress-bar-wrapper');
 var $cancelUploadButton = $('#cancel-upload');
 var $alertWrapper = $('#alert-wrapper');
+var $alertMessage = $alertWrapper.find('#alert-message');
 var $wrongFileWrapper = $('#wrong-file-wrapper');
 
 var data = Fliplet.Widget.getData() || {};
@@ -387,13 +388,33 @@ function sortByName(item1, item2) {
 }
 
 
-function getApps(options) {
+function getApps() {
   return Fliplet.Apps
-    .get(options)
+    .get()
     .then(function(apps) {
       return apps.sort(sortByName).filter(function(app) {
         return !app.legacy;
       });
+    });
+}
+
+function getAppById(appId) {
+  return Fliplet.API.request('v1/apps/' + appId);
+}
+
+function updateAppMetrics(appId) {
+  return getAppById(appId)
+    .then(function(result) {
+      var updatedApp = result.app;
+      var appIndex = userApps.findIndex(function(app) {
+        return app.id === updatedApp.id;
+      });
+
+      if (appIndex === -1) {
+        return;
+      }
+
+      userApps[appIndex].metrics = updatedApp.metrics;
     });
 }
 
@@ -1289,6 +1310,9 @@ function uploadFiles(files) {
   hideDropZone();
   showProgressBar();
 
+  var value = $fileDropDown.val().split('_');
+  var appId = parseInt(value[1], 10);
+
   Fliplet.Media.Files.upload(config)
     .then(function(files) {
       if (files.length) {
@@ -1305,30 +1329,34 @@ function uploadFiles(files) {
 
       hideProgressBar();
 
-      return getApps({
-        cache: false
-      });
+      if (!appId) {
+        return;
+      }
+
+      return updateAppMetrics(appId);
     })
-    .then(function (apps) {
-      // Updated list to update the storage usage values
-      userApps = apps;
-
-      var value = $fileDropDown.val().split('_');
-      var appId = parseInt(value[1], 10);
-
+    .then(function() {
       toggleStorageUsage(appId);
     })
     .catch(handleUploadingError);
 }
 
-function handleUploadingError() {
+function handleUploadingError(error) {
   hideProgressBar();
+
   if (isCancelClicked) return;
-  showError();
+
+  showError(Fliplet.parseError(
+    error,
+    'There was an error while uploading your file. Please try again.'
+  ));
 }
 
-function showError() {
+function showError(errorMessage) {
+  $alertMessage.text(errorMessage);
+
   $alertWrapper.show();
+
   setTimeout(function() {
     $alertWrapper.hide();
   }, 3000);
