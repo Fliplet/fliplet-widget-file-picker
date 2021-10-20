@@ -11,6 +11,7 @@ var $progressLine = $('#progress-line');
 var $progressBarWrapper = $('#progress-bar-wrapper');
 var $cancelUploadButton = $('#cancel-upload');
 var $alertWrapper = $('#alert-wrapper');
+var $alertMessage = $alertWrapper.find('#alert-message');
 var $wrongFileWrapper = $('#wrong-file-wrapper');
 
 var data = Fliplet.Widget.getData() || {};
@@ -1336,14 +1337,21 @@ function uploadFiles(files) {
     .catch(handleUploadingError);
 }
 
-function handleUploadingError() {
+function handleUploadingError(error) {
   hideProgressBar();
+
   if (isCancelClicked) return;
-  showError();
+
+  showError(Fliplet.parseError(error));
 }
 
-function showError() {
+function showError(errorMessage) {
+  var defaultErrorMessage = 'There was an error while uploading your file. Please try again.';
+
+  $alertMessage.text(errorMessage || defaultErrorMessage);
+
   $alertWrapper.show();
+
   setTimeout(function() {
     $alertWrapper.hide();
   }, 3000);
