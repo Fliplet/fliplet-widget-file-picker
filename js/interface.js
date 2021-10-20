@@ -410,6 +410,10 @@ function updateAppMetrics(appId) {
         return app.id === updatedApp.id;
       });
 
+      if (appIndex === -1) {
+        return;
+      }
+
       userApps[appIndex].metrics = updatedApp.metrics;
     });
 }
@@ -1342,13 +1346,14 @@ function handleUploadingError(error) {
 
   if (isCancelClicked) return;
 
-  showError(Fliplet.parseError(error));
+  showError(Fliplet.parseError(
+    error,
+    'There was an error while uploading your file. Please try again.'
+  ));
 }
 
 function showError(errorMessage) {
-  var defaultErrorMessage = 'There was an error while uploading your file. Please try again.';
-
-  $alertMessage.text(errorMessage || defaultErrorMessage);
+  $alertMessage.text(errorMessage);
 
   $alertWrapper.show();
 
