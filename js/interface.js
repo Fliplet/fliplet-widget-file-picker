@@ -1,6 +1,5 @@
 document.documentElement.classList.add('provider-' + Fliplet.Env.get('providerMode'));
 
-var organizationIsSelfServe;
 var $imagesContainer = $('.image-library');
 var $fileDropDown = $('#drop-down-file-source');
 var $dropZone = $('#drop-zone');
@@ -15,6 +14,7 @@ var $alertWrapper = $('#alert-wrapper');
 var $alertMessage = $alertWrapper.find('#alert-message');
 var $wrongFileWrapper = $('#wrong-file-wrapper');
 var data = Fliplet.Widget.getData() || {};
+var organizationIsSelfServe = !!data.organizationIsSelfServe;
 
 data.type = data.type || '';
 data.selectFiles = data.selectFiles || [];
@@ -1063,16 +1063,6 @@ function renderOrganization(id) {
   openOrganization(id);
 }
 
-function setOrganizationType() {
-  var currentOrganization = _.find(userOrganizations, function(org) {
-    return org.id === Fliplet.Env.get('organizationId');
-  });
-  var organizationPlan = _.get(currentOrganization, 'settings.plan', {});
-
-  organizationIsSelfServe = ['enterprise', 'bronze', 'silver', 'gold', 'platinum']
-    .indexOf(organizationPlan.name) < 0;
-}
-
 function init() {
   Fliplet.Studio.emit('widget-rendered', {});
   Promise.all([
@@ -1082,8 +1072,6 @@ function init() {
     .then(function(values) {
       userOrganizations = values[0];
       userApps = values[1];
-
-      setOrganizationType();
 
       var dropDownHtml = [];
       var thisOrganization = _.find(userOrganizations, function(org) {
