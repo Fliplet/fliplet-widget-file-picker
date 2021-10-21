@@ -15,6 +15,7 @@ var $alertWrapper = $('#alert-wrapper');
 var $alertMessage = $alertWrapper.find('#alert-message');
 var $wrongFileWrapper = $('#wrong-file-wrapper');
 var data = Fliplet.Widget.getData() || {};
+var currentAppId;
 
 data.type = data.type || '';
 data.selectFiles = data.selectFiles || [];
@@ -403,14 +404,11 @@ function getAppById(appId) {
 }
 
 function updateAppMetrics() {
-  var value = $fileDropDown.val().split('_');
-  var appId = parseInt(value[1], 10);
-
-  if (!appId) {
+  if (!currentAppId) {
     return;
   }
 
-  return getAppById(appId)
+  return getAppById(currentAppId)
     .then(function(result) {
       var updatedApp = result.app;
       var appIndex = userApps.findIndex(function(app) {
@@ -481,19 +479,16 @@ function displayDeletionConfirmation(type, id) {
 }
 
 function toggleStorageUsage() {
-  var value = $fileDropDown.val().split('_');
-  var appId = value[0] === 'app' ? parseInt(value[1], 10) : '';
-
   // Show or hide the storage usage UI
-  $('.storage-holder').toggleClass('hidden', !appId);
+  $('.storage-holder').toggleClass('hidden', !currentAppId);
 
-  if (!appId) {
+  if (!currentAppId) {
     return;
   }
 
   // Get the selected app
   var selectedApp = _.find(userApps, function(app) {
-    return app.id === appId;
+    return app.id === currentAppId;
   });
 
   if (!selectedApp) {
@@ -1139,6 +1134,8 @@ function init() {
         var dataAttr = $fileDropDown.val().split('_');
         var type = dataAttr[0];
         var id = parseInt(dataAttr[1], 10);
+
+        currentAppId = type === 'app' ? id : '';
 
         switch (type) {
           case 'app':
