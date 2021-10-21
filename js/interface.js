@@ -402,7 +402,14 @@ function getAppById(appId) {
   return Fliplet.API.request('v1/apps/' + appId);
 }
 
-function updateAppMetrics(appId) {
+function updateAppMetrics() {
+  var value = $fileDropDown.val().split('_');
+  var appId = parseInt(value[1], 10);
+
+  if (!appId) {
+    return;
+  }
+
   return getAppById(appId)
     .then(function(result) {
       var updatedApp = result.app;
@@ -473,7 +480,10 @@ function displayDeletionConfirmation(type, id) {
   });
 }
 
-function toggleStorageUsage(appId) {
+function toggleStorageUsage() {
+  var value = $fileDropDown.val().split('_');
+  var appId = value[0] === 'app' ? parseInt(value[1], 10) : '';
+
   // Show or hide the storage usage UI
   $('.storage-holder').toggleClass('hidden', !appId);
 
@@ -548,7 +558,7 @@ function openApp(appId) {
 
       renderFolderContent(response);
       updatePaths();
-      toggleStorageUsage(appId);
+      toggleStorageUsage();
 
       $spinnerHolder.addClass('hidden');
     });
@@ -1157,6 +1167,11 @@ Fliplet.Studio.onMessage(function(event) {
 
   if (data.event === 'overlay-close' && data.title === 'File Manager') {
     upTo[upTo.length - 1].back();
+
+    updateAppMetrics()
+      .then(function () {
+        toggleStorageUsage();
+      });
   }
 });
 
@@ -1317,9 +1332,6 @@ function uploadFiles(files) {
   hideDropZone();
   showProgressBar();
 
-  var value = $fileDropDown.val().split('_');
-  var appId = parseInt(value[1], 10);
-
   Fliplet.Media.Files.upload(config)
     .then(function(files) {
       if (files.length) {
@@ -1336,14 +1348,10 @@ function uploadFiles(files) {
 
       hideProgressBar();
 
-      if (!appId) {
-        return;
-      }
-
-      return updateAppMetrics(appId);
+      return updateAppMetrics();
     })
     .then(function() {
-      toggleStorageUsage(appId);
+      toggleStorageUsage();
     })
     .catch(handleUploadingError);
 }
