@@ -1422,6 +1422,14 @@ function drawContentItems() {
   _.sortBy(folders, byLowerCaseName).forEach(addFolder);
   _.sortBy(files, byLowerCaseName).forEach(addFile);
 
+  $imagesContainer.find('.image-title').each(function () {
+    var fileName = this.innerText;
+
+    if (fileName.length > 55) {
+      $(this).html(fileName.replace(fileName.match(/^.{20}(.*).{20}$/)[1], '...'));
+    }
+  })
+
   Fliplet.Widget.autosize();
 }
 
