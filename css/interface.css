@@ -291,6 +291,7 @@ body.folderOnly .helper {
   font-size: 11px;
   margin-top: 1px;
   word-break: break-word;
+  overflow: hidden;
   position: relative;
   line-height: 1.4em;
   max-height: 4.2em;
