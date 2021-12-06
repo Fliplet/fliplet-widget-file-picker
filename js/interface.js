@@ -1426,7 +1426,7 @@ function drawContentItems() {
     var fileName = this.innerText;
 
     if (fileName.length > 55) {
-      $(this).html(fileName.replace(fileName.match(/^.{20}(.*).{20}$/)[1], '...'));
+      $(this).html(fileName.replace(fileName.match(/^.{20}(.*).{20}$/)[1], '&hellip;'));
     }
   })
 
