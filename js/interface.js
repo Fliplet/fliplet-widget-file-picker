@@ -1419,19 +1419,16 @@ function drawContentItems() {
   }
 
   $imagesContainer.empty();
-
   _.sortBy(folders, byLowerCaseName).forEach(addFolder);
   _.sortBy(files, byLowerCaseName).forEach(addFile);
 
-  Handlebars.registerHelper('formatName', function(name) {
-    $imagesContainer.find('.image-title').each(function () {
-      var fileName = this.innerText;
-  
-      if (fileName.length > 55) {
-        $(this).html(fileName.replace(fileName.match(/^.{20}(.*).{20}$/)[1], '&hellip;'));
-      }
-    })
-  });
+  $imagesContainer.find('.image-title').each(function () {
+    var fileName = this.innerText;
+
+    if (fileName.length > 55) {
+      $(this).html(fileName.replace(fileName.match(/^.{20}(.*).{20}$/)[1], '&hellip;'));
+    }
+  })
 
   Fliplet.Widget.autosize();
 }
