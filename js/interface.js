@@ -1080,12 +1080,7 @@ function setOrganizationType() {
 
 function init() {
   Handlebars.registerHelper('formatName', function(fileName) {
-    debugger;
-    if (fileName.length > 55) {
-      return fileName.replace(fileName.match(/^.{20}(.*).{20}$/)[1], '...');
-    }
-
-    return fileName;
+    return fileName.length > 55 ? fileName.replace(fileName.match(/^.{20}(.*).{20}$/)[1], '...') : fileName;
   });
 
   Fliplet.Studio.emit('widget-rendered', {});
