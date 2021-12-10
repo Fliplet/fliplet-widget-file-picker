@@ -1079,6 +1079,10 @@ function setOrganizationType() {
 }
 
 function init() {
+  Handlebars.registerHelper('formatName', function(fileName) {
+    return fileName.length > 55 ? fileName.substring(0, 20) + '...' + fileName.substring(fileName.length - 20) : fileName;
+  });
+
   Fliplet.Studio.emit('widget-rendered', {});
   Promise.all([
     getOrganizations(),

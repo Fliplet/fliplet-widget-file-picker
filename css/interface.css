@@ -288,6 +288,7 @@ body.folderOnly .helper {
 }
 
 .image-title {
+  line-break: anywhere;
   font-size: 11px;
   margin-top: 1px;
   word-break: break-word;

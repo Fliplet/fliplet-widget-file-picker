@@ -1,0 +1,23 @@
+{
+  "name": "fliplet-widget-file-picker",
+  "version": "1.0.0",
+  "main": "interface.js",
+  "scripts": {
+    "eslint:github-action": "eslint ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Fliplet/fliplet-widget-file-picker.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Fliplet/fliplet-widget-file-picker/issues"
+  },
+  "homepage": "https://github.com/Fliplet/fliplet-widget-file-picker#readme",
+  "devDependencies": {
+    "babel-eslint": "^10.1.0",
+    "eslint": "^7.14.0",
+    "eslint-config-fliplet": "^1.0.8"
+  }
+}
