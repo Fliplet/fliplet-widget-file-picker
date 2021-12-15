@@ -142,29 +142,6 @@ body.folderOnly .helper {
   padding-right: 85px;
 }
 
-.storage-holder {
-  display: flex;
-  flex-flow: row nowrap;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 10;
-  background-color: #f8f6f7;
-  padding: 15px;
-  border-top: 1px solid rgba(51, 51, 51, 0.1);
-}
-
-.storage-holder .storage-progress-wrapper {
-  flex: 1;
-}
-
-.storage-holder .storage-progress-wrapper p {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 .image-library {
   display: flex;
   justify-content: flex-start;

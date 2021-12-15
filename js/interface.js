@@ -23,7 +23,7 @@ Fliplet.Widget.toggleSaveButton(data.selectFiles.length);
 if (!Array.isArray(data.selectFiles)) data.selectFiles = [data.selectFiles];
 data.fileExtension = data.fileExtension || [];
 data.selectMultiple = data.selectMultiple || false;
-data.allowOrganizationFolder = data.allowOrganizationFolder !== false;
+data.allowOrganisationFolder = data.allowOrganisationFolder !== false;
 if (!(data.selectMultiple && data.selectFiles.length > 1) && !data.selectFiles) data.selectFiles = [data.selectFiles[0]];
 
 if (data.type === 'folder') {
@@ -42,8 +42,6 @@ var apps = [];
 var organizations = [];
 var folders = [];
 var files = [];
-var userOrganizations = [];
-var userApps = [];
 
 var validType = {
   image: {
@@ -346,25 +344,6 @@ $(document)
     navStack.upTo.pop(); // Remove last one
 
     initFileManagerOverlay(navStack);
-  })
-  .on('click', '.storage-holder .btn-upgrade', function () {
-    var value = $fileDropDown.val().split('_');
-    var appId = parseInt(value[1], 10);
-
-    if (!appId) {
-      return;
-    }
-
-    Fliplet.Studio.emit('overlay', {
-      name: 'app-settings',
-      options: {
-        size: 'large',
-        title: 'App Settings',
-        appId: appId,
-        section: 'appBilling',
-        helpLink: 'https://help.fliplet.com/app-settings/'
-      }
-    });
   });
 
 function sortByName(item1, item2) {
@@ -436,52 +415,6 @@ function displayDeletionConfirmation(type, id) {
   });
 }
 
-function toggleStorageUsage(appId) {
-  // Show or hide the storage usage UI
-  $('.storage-holder')[appId ? 'removeClass' : 'addClass']('hidden');
-
-  if (!appId) {
-    return;
-  }
-
-  // Get the selected app
-  var selectedApp = _.find(userApps, function(app) {
-    return app.id === appId;
-  });
-
-  if (!selectedApp) {
-    return;
-  }
-
-  var appMetrics = selectedApp.metrics
-    ? selectedApp.metrics.storageUsed || 0
-    : 0;
-  var storageUsageInBytes = Math.round(appMetrics * 1024);
-  var formattedStorageUsage = formatBytes(storageUsageInBytes);
-  var isPaidApp = selectedApp.plan && selectedApp.plan.active;
-  var currentOrganization = _.find(userOrganizations, function(org) {
-    return org.id === Fliplet.Env.get('organizationId');
-  });
-  var organizationPlan = _.get(currentOrganization, 'settings.plan', {})
-  var organizationIsSelfServe = ['enterprise', 'bronze', 'silver', 'gold', 'platinum']
-    .indexOf(organizationPlan.name) < 0
-
-  // Toggle progress bar and upgrade button
-  $('.storage-holder .btn-upgrade')[!organizationIsSelfServe || isPaidApp
-    ? 'addClass'
-    : 'removeClass'
-  ]('hidden');
-
-  // Update the UI to show the storage usage
-  $('.storage-holder .storage-progress-wrapper p span').text(selectedApp.name);
-  $('.storage-holder .storage-size .storage-usage').text(formattedStorageUsage);
-  $('.storage-holder .storage-size .storage-limit').text(
-    !organizationIsSelfServe || isPaidApp
-      ? 'Unlimited'
-      : '500 MB'
-  );
-}
-
 function openFolder(folderId) {
   $spinnerHolder.removeClass('hidden');
   opening = {
@@ -518,8 +451,6 @@ function openApp(appId) {
 
       renderFolderContent(response);
       updatePaths();
-      toggleStorageUsage(appId);
-
       $spinnerHolder.addClass('hidden');
     });
 }
@@ -540,8 +471,6 @@ function openOrganization(organizationId) {
 
       renderFolderContent(response);
       updatePaths();
-      toggleStorageUsage();
-
       $spinnerHolder.addClass('hidden');
     });
 }
@@ -1042,28 +971,27 @@ function init() {
     getApps()
   ])
     .then(function(values) {
-      userOrganizations = values[0];
-      userApps = values[1];
-
-      var dropDownHtml = [];
-      var thisOrganization = _.find(userOrganizations, function(org) {
+      var userOrganisations = values[0];
+      var userApps = values[1];
+      let dropDownHtml = [];
+      var thisOrganisation = _.find(userOrganisations, function(org) {
         return org.id === Fliplet.Env.get('organizationId');
       });
       var thisApp = _.find(userApps, function(app) {
         return app.id === Fliplet.Env.get('appId');
       });
 
-      // Organizations
-      if (thisOrganization) {
-        if (data.allowOrganizationFolder) {
-          dropDownHtml.push('<optgroup label="--- Organization ---">');
-          dropDownHtml.push('<option value="org_' + thisOrganization.id + '">' + thisOrganization.name + '</option>');
+      // Organisations
+      if (thisOrganisation) {
+        if (data.allowOrganisationFolder) {
+          dropDownHtml.push('<optgroup label="--- Organisation ---">');
+          dropDownHtml.push('<option value="org_' + thisOrganisation.id + '">' + thisOrganisation.name + '</option>');
           dropDownHtml.push('</optgroup>');
         }
 
         organizations.push({
-          id: thisOrganization.id,
-          name: thisOrganization.name
+          id: thisOrganisation.id,
+          name: thisOrganisation.name
         });
       }
 
