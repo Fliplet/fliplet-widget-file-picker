@@ -1,6 +1,5 @@
 document.documentElement.classList.add('provider-' + Fliplet.Env.get('providerMode'));
 
-var organizationIsSelfServe;
 var $imagesContainer = $('.image-library');
 var $fileDropDown = $('#drop-down-file-source');
 var $dropZone = $('#drop-zone');
@@ -14,6 +13,7 @@ var $cancelUploadButton = $('#cancel-upload');
 var $alertWrapper = $('#alert-wrapper');
 var $alertMessage = $alertWrapper.find('#alert-message');
 var $wrongFileWrapper = $('#wrong-file-wrapper');
+
 var data = Fliplet.Widget.getData() || {};
 
 data.type = data.type || '';
@@ -430,8 +430,7 @@ function initFileManagerOverlay(navStack) {
         context: 'overlay',
         appId: Fliplet.Env.get('appId'),
         folder: navStack.tempStack[navStack.tempStack.length - 1],
-        navStack: navStack,
-        organizationIsSelfServe: organizationIsSelfServe
+        navStack: navStack
       },
       helpLink: 'https://help.fliplet.com/selecting-files/'
     }
@@ -496,6 +495,12 @@ function toggleStorageUsage(appId) {
   var storageUsageInBytes = Math.round(appMetrics * 1024);
   var formattedStorageUsage = formatBytes(storageUsageInBytes);
   var isPaidApp = selectedApp.plan && selectedApp.plan.active;
+  var currentOrganization = _.find(userOrganizations, function(org) {
+    return org.id === Fliplet.Env.get('organizationId');
+  });
+  var organizationPlan = _.get(currentOrganization, 'settings.plan', {})
+  var organizationIsSelfServe = ['enterprise', 'bronze', 'silver', 'gold', 'platinum']
+    .indexOf(organizationPlan.name) < 0
 
   // Toggle progress bar and upgrade button
   $('.storage-holder .btn-upgrade').toggleClass('hidden', !organizationIsSelfServe || !!isPaidApp);
@@ -1063,16 +1068,6 @@ function renderOrganization(id) {
   openOrganization(id);
 }
 
-function setOrganizationType() {
-  var currentOrganization = _.find(userOrganizations, function(org) {
-    return org.id === Fliplet.Env.get('organizationId');
-  });
-  var organizationPlan = _.get(currentOrganization, 'settings.plan', {});
-
-  organizationIsSelfServe = ['enterprise', 'bronze', 'silver', 'gold', 'platinum']
-    .indexOf(organizationPlan.name) < 0;
-}
-
 function init() {
   Handlebars.registerHelper('formatName', function(fileName) {
     return fileName.length > 55 ? fileName.substring(0, 20) + '...' + fileName.substring(fileName.length - 20) : fileName;
@@ -1086,8 +1081,6 @@ function init() {
     .then(function(values) {
       userOrganizations = values[0];
       userApps = values[1];
-
-      setOrganizationType();
 
       var dropDownHtml = [];
       var thisOrganization = _.find(userOrganizations, function(org) {
