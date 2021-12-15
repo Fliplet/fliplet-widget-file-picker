@@ -15,7 +15,6 @@ var $alertWrapper = $('#alert-wrapper');
 var $alertMessage = $alertWrapper.find('#alert-message');
 var $wrongFileWrapper = $('#wrong-file-wrapper');
 var data = Fliplet.Widget.getData() || {};
-var currentAppId;
 
 data.type = data.type || '';
 data.selectFiles = data.selectFiles || [];
@@ -403,12 +402,8 @@ function getAppById(appId) {
   return Fliplet.API.request('v1/apps/' + appId);
 }
 
-function updateAppMetrics() {
-  if (!currentAppId) {
-    return;
-  }
-
-  return getAppById(currentAppId)
+function updateAppMetrics(appId) {
+  return getAppById(appId)
     .then(function(result) {
       var updatedApp = result.app;
       var appIndex = userApps.findIndex(function(app) {
@@ -478,17 +473,17 @@ function displayDeletionConfirmation(type, id) {
   });
 }
 
-function toggleStorageUsage() {
+function toggleStorageUsage(appId) {
   // Show or hide the storage usage UI
-  $('.storage-holder').toggleClass('hidden', !currentAppId);
+  $('.storage-holder').toggleClass('hidden', !appId);
 
-  if (!currentAppId) {
+  if (!appId) {
     return;
   }
 
   // Get the selected app
   var selectedApp = _.find(userApps, function(app) {
-    return app.id === currentAppId;
+    return app.id === appId;
   });
 
   if (!selectedApp) {
@@ -553,7 +548,7 @@ function openApp(appId) {
 
       renderFolderContent(response);
       updatePaths();
-      toggleStorageUsage();
+      toggleStorageUsage(appId);
 
       $spinnerHolder.addClass('hidden');
     });
@@ -1139,8 +1134,6 @@ function init() {
         var type = dataAttr[0];
         var id = parseInt(dataAttr[1], 10);
 
-        currentAppId = type === 'app' ? id : '';
-
         switch (type) {
           case 'app':
             renderApp(id);
@@ -1168,11 +1161,6 @@ Fliplet.Studio.onMessage(function(event) {
 
   if (data.event === 'overlay-close' && data.title === 'File Manager') {
     upTo[upTo.length - 1].back();
-
-    updateAppMetrics()
-      .then(function () {
-        toggleStorageUsage();
-      });
   }
 });
 
@@ -1333,6 +1321,9 @@ function uploadFiles(files) {
   hideDropZone();
   showProgressBar();
 
+  var value = $fileDropDown.val().split('_');
+  var appId = parseInt(value[1], 10);
+
   Fliplet.Media.Files.upload(config)
     .then(function(files) {
       if (files.length) {
@@ -1349,10 +1340,14 @@ function uploadFiles(files) {
 
       hideProgressBar();
 
-      return updateAppMetrics();
+      if (!appId) {
+        return;
+      }
+
+      return updateAppMetrics(appId);
     })
     .then(function() {
-      toggleStorageUsage();
+      toggleStorageUsage(appId);
     })
     .catch(handleUploadingError);
 }
