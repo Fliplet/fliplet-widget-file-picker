@@ -1,26 +1,25 @@
 body,
 html {
-  overflow-x: auto;
-}
-
-html.provider-inline,
-html.provider-inline body {
-  height: auto;
+  overflow-x: hidden;
+  height: 100%;
 }
 
 .holder {
   position: relative;
   width: 100%;
   min-height: 135px;
-}
-
-#app {
+  /* 300px => size of all elements surrounding the .holder */
+  height: calc(100% - 300px);
   overflow: auto;
 }
 
-html.provider-inline #app {
-  height: auto;
-  max-height: none;
+html.provider-inline .holder {
+  /* 242px => size of all elements surrounding the .holder */
+  height: calc(100% - 242px);
+}
+
+#app {
+  height: 100%;
 }
 
 html.provider-inline header {
@@ -98,8 +97,6 @@ html.provider-inline header {
   line-height: 44px;
 }
 
-.gallery-tool.with-tools {}
-
 .gallery-tool .back-btn {
   padding: 0 0 0 34px;
   position: relative;
@@ -143,13 +140,13 @@ body.folderOnly .helper {
 }
 
 .storage-holder {
-  display: flex;
-  flex-flow: row nowrap;
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   z-index: 10;
+  display: flex;
+  flex-flow: row nowrap;
   background-color: #f8f6f7;
   padding: 15px;
   border-top: 1px solid rgba(51, 51, 51, 0.1);
@@ -169,8 +166,6 @@ body.folderOnly .helper {
   display: flex;
   justify-content: flex-start;
   flex-flow: wrap;
-  padding-top: 15px;
-  margin-bottom: 5px;
 }
 
 .image-library .nofiles-msg {
@@ -598,6 +593,7 @@ body.folderOnly .drop-note {
 
 #app header {
   padding: 10px 15px;
+  margin-bottom: 15px;
 }
 
 .image-holder:hover .image-overlay,
@@ -622,18 +618,9 @@ body.folderOnly .drop-note {
   position: relative;
 }
 
-.holder {
-  overflow-y: auto;
-}
-
 .menu-fixed .form-group {
   margin-bottom: 0;
-}
-
-.holder:after {
-  content: "";
-  display: block;
-  margin-bottom: 110px;
+  margin-bottom: 10px;
 }
 
 .dropdown-menu {
