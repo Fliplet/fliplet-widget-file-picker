@@ -1125,6 +1125,8 @@ function init() {
           id: thisApp.id,
           name: thisApp.name
         });
+
+        currentAppId = thisApp.id;
       }
 
       $fileDropDown.append(dropDownHtml.join(''));
