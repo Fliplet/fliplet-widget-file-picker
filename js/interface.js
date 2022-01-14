@@ -1084,6 +1084,17 @@ function createFolder() {
       return;
     }
 
+    if (result.length > 45) {
+      Fliplet.Modal.alert({ 
+        title: 'Failed to create folder',
+        message: 'Folder name must be 45 characters or less'
+      }).then(function () {
+        createFolder()
+      });
+
+      return;
+    }
+
     var folderName = result.trim() || 'Untitled folder';
     var config = {
       name: folderName
