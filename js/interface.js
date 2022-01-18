@@ -1076,9 +1076,10 @@ function uploadFile() {
   $fileInput.click();
 }
 
-function createFolder() {
+function createFolder(event, folderName) {
   Fliplet.Modal.prompt({
-    title: 'Please enter a folder name'
+    title: 'Please enter a folder name',
+    value: folderName || ''
   }).then(function(result) {
     if (result === null) {
       return;
@@ -1089,7 +1090,7 @@ function createFolder() {
         title: 'Failed to create folder',
         message: 'Folder name must be 45 characters or less'
       }).then(function () {
-        createFolder()
+        createFolder(null, result);
       });
 
       return;
