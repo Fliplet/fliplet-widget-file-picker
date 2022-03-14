@@ -4,18 +4,18 @@ html {
   height: 100%;
 }
 
+#app {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
 .holder {
   position: relative;
   width: 100%;
   min-height: 135px;
-  /* 300px => size of all elements surrounding the .holder */
-  height: calc(100% - 300px);
+  flex: 1;
   overflow: auto;
-}
-
-html.provider-inline .holder {
-  /* 242px => size of all elements surrounding the .holder */
-  height: calc(100% - 242px);
 }
 
 .holder.is-organization {
@@ -26,10 +26,6 @@ html.provider-inline .holder {
 html.provider-inline .holder.is-organization {
   /* 161px => size of all elements surrounding the .holder */
   height: calc(100% - 161px);
-}
-
-#app {
-  height: 100%;
 }
 
 html.provider-inline header {
@@ -43,7 +39,7 @@ html.provider-inline header {
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(255,255,255,0.8);
+  background: rgba(255, 255, 255, 0.8);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -86,7 +82,7 @@ html.provider-inline header {
 
 .titles {
   font-size: 0.8em;
-  border-bottom: 1px solid #E3E9EB;
+  border-bottom: 1px solid #e3e9eb;
   margin-bottom: 1rem;
   padding-bottom: 1.5em;
 }
@@ -121,7 +117,7 @@ html.provider-inline header {
 }
 
 .gallery-tool .back-btn:hover {
-  background: #D9DDDE;
+  background: #d9ddde;
   border-radius: 20%;
 }
 
@@ -150,11 +146,6 @@ body.folderOnly .helper {
 }
 
 .storage-holder {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 10;
   display: flex;
   flex-flow: row nowrap;
   background-color: #f8f6f7;
@@ -201,7 +192,7 @@ body.folderOnly .helper {
   background-position: center center;
   background-size: contain;
   border: 1px solid #d9ddde;
-  background-color: #FFFFFF;
+  background-color: #ffffff;
 }
 
 .thumb-wrapper .more-options {
@@ -254,7 +245,7 @@ body.folderOnly .helper {
 
 .image-overlay::after,
 .image-overlay::before {
-  content: '';
+  content: "";
   width: 100%;
   order: 1;
 }
@@ -300,14 +291,14 @@ body.folderOnly .helper {
 }
 
 .image-title:before {
-  content: '...';
+  content: "...";
   position: absolute;
   right: 0;
   bottom: 0;
 }
 
 .image-title:after {
-  content: '';
+  content: "";
   position: absolute;
   right: 0;
   width: 1em;
@@ -337,7 +328,8 @@ body.folderOnly .helper {
   color: #00abd2;
 }
 
-.folder.selected .image-overlay .fa {}
+.folder.selected .image-overlay .fa {
+}
 
 .folder.selected .image-holder,
 .image.selected .image-holder {
@@ -368,19 +360,19 @@ body.folderOnly .helper {
 
 .more-options ul.dropdown-menu li:hover,
 .more-options ul.dropdown-menu li:focus {
-    background-color: #f5f5f5;
+  background-color: #f5f5f5;
 }
 
 .more-options ul.dropdown-menu .divider {
-    height: 1px;
-    margin: 9px 0;
-    padding: 0;
-    overflow: hidden;
-    background-color: #e5e5e5;
+  height: 1px;
+  margin: 9px 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #e5e5e5;
 }
 
 .more-options ul.dropdown-menu .text-danger {
-  color: #E03629;
+  color: #e03629;
 }
 
 .organization-media {
@@ -397,7 +389,7 @@ body.folderOnly .helper {
   margin-top: -12px;
   font-size: 20px;
   text-align: center;
-  color: rgba(0,0,0,0.1);
+  color: rgba(0, 0, 0, 0.1);
 }
 
 .organization-media.active .fa {
@@ -411,7 +403,7 @@ body.folderOnly .helper {
 @media only screen and (min-width: 488px) {
   .titles,
   header {
-    font-size: 1.0em;
+    font-size: 1em;
   }
 
   .image-drop-zone p {
@@ -420,7 +412,7 @@ body.folderOnly .helper {
 }
 
 .drop-zone {
-  background: rgba(255, 255, 255, 0.70);
+  background: rgba(255, 255, 255, 0.7);
   border: 2px dashed #00abd2;
   text-align: center;
   cursor: pointer;
@@ -480,7 +472,7 @@ body.folderOnly .drop-note {
 
 .what-to-add-selector .has-bottom-border {
   min-height: 46px;
-  border-bottom: 1px solid #E3E9EB;
+  border-bottom: 1px solid #e3e9eb;
 }
 
 .drop-note {
