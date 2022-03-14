@@ -1,5 +1,6 @@
 document.documentElement.classList.add('provider-' + Fliplet.Env.get('providerMode'));
 
+var organizationIsSelfServe;
 var $imagesContainer = $('.image-library');
 var $fileDropDown = $('#drop-down-file-source');
 var $dropZone = $('#drop-zone');
@@ -11,9 +12,10 @@ var $progressLine = $('#progress-line');
 var $progressBarWrapper = $('#progress-bar-wrapper');
 var $cancelUploadButton = $('#cancel-upload');
 var $alertWrapper = $('#alert-wrapper');
+var $alertMessage = $alertWrapper.find('#alert-message');
 var $wrongFileWrapper = $('#wrong-file-wrapper');
-
 var data = Fliplet.Widget.getData() || {};
+var currentAppId;
 
 data.type = data.type || '';
 data.selectFiles = data.selectFiles || [];
@@ -23,7 +25,7 @@ Fliplet.Widget.toggleSaveButton(data.selectFiles.length);
 if (!Array.isArray(data.selectFiles)) data.selectFiles = [data.selectFiles];
 data.fileExtension = data.fileExtension || [];
 data.selectMultiple = data.selectMultiple || false;
-data.allowOrganisationFolder = data.allowOrganisationFolder !== false;
+data.allowOrganizationFolder = data.allowOrganizationFolder !== false;
 if (!(data.selectMultiple && data.selectFiles.length > 1) && !data.selectFiles) data.selectFiles = [data.selectFiles[0]];
 
 if (data.type === 'folder') {
@@ -42,6 +44,8 @@ var apps = [];
 var organizations = [];
 var folders = [];
 var files = [];
+var userOrganizations = [];
+var userApps = [];
 
 var validType = {
   image: {
@@ -185,6 +189,21 @@ Object.keys(extensionDictionary).forEach(function(key) {
     });
   });
 });
+
+// Formats the file size from bytes
+function formatBytes(bytes, decimals = 2) {
+  if (bytes === 0) {
+    return '0 Bytes';
+  }
+
+  var k = 1024;
+  var dm = decimals < 0 ? 0 : decimals;
+  var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+  var i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+}
 
 function getFilteredType(extension) {
   var fileExtension = _.find(validExtensions, function(valid) {
@@ -344,6 +363,25 @@ $(document)
     navStack.upTo.pop(); // Remove last one
 
     initFileManagerOverlay(navStack);
+  })
+  .on('click', '.storage-holder .btn-upgrade', function () {
+    var value = $fileDropDown.val().split('_');
+    var appId = parseInt(value[1], 10);
+
+    if (!appId) {
+      return;
+    }
+
+    Fliplet.Studio.emit('overlay', {
+      name: 'app-settings',
+      options: {
+        size: 'large',
+        title: 'App Settings',
+        appId: appId,
+        section: 'appBilling',
+        helpLink: 'https://help.fliplet.com/app-settings/'
+      }
+    });
   });
 
 function sortByName(item1, item2) {
@@ -361,6 +399,30 @@ function getApps() {
     });
 }
 
+function getAppById(appId) {
+  return Fliplet.API.request('v1/apps/' + appId);
+}
+
+function updateAppMetrics() {
+  if (!currentAppId) {
+    return;
+  }
+
+  return getAppById(currentAppId)
+    .then(function(result) {
+      var updatedApp = result.app;
+      var appIndex = userApps.findIndex(function(app) {
+        return app.id === updatedApp.id;
+      });
+
+      if (appIndex === -1) {
+        return;
+      }
+
+      userApps[appIndex].metrics = updatedApp.metrics;
+    });
+}
+
 function initFileManagerOverlay(navStack) {
   Fliplet.Studio.emit('overlay', {
     name: 'widget',
@@ -373,7 +435,8 @@ function initFileManagerOverlay(navStack) {
         context: 'overlay',
         appId: Fliplet.Env.get('appId'),
         folder: navStack.tempStack[navStack.tempStack.length - 1],
-        navStack: navStack
+        navStack: navStack,
+        organizationIsSelfServe: organizationIsSelfServe
       },
       helpLink: 'https://help.fliplet.com/selecting-files/'
     }
@@ -415,6 +478,43 @@ function displayDeletionConfirmation(type, id) {
   });
 }
 
+function toggleStorageUsage() {
+  // Show or hide the storage usage UI
+  $('.storage-holder').toggleClass('hidden', !currentAppId);
+
+  if (!currentAppId) {
+    return;
+  }
+
+  // Get the selected app
+  var selectedApp = _.find(userApps, function(app) {
+    return app.id === currentAppId;
+  });
+
+  if (!selectedApp) {
+    return;
+  }
+
+  var appMetrics = selectedApp.metrics
+    ? selectedApp.metrics.storageUsed || 0
+    : 0;
+  var storageUsageInBytes = Math.round(appMetrics * 1024);
+  var formattedStorageUsage = formatBytes(storageUsageInBytes);
+  var isPaidApp = selectedApp.plan && selectedApp.plan.active;
+
+  // Toggle progress bar and upgrade button
+  $('.storage-holder .btn-upgrade').toggleClass('hidden', !organizationIsSelfServe || !!isPaidApp);
+
+  // Update the UI to show the storage usage
+  $('.storage-holder .storage-progress-wrapper p span').text(selectedApp.name);
+  $('.storage-holder .storage-size .storage-usage').text(formattedStorageUsage);
+  $('.storage-holder .storage-size .storage-limit').text(
+    !organizationIsSelfServe || isPaidApp
+      ? 'Unlimited'
+      : '500 MB'
+  );
+}
+
 function openFolder(folderId) {
   $spinnerHolder.removeClass('hidden');
   opening = {
@@ -437,6 +537,8 @@ function openFolder(folderId) {
 
 function openApp(appId) {
   $spinnerHolder.removeClass('hidden');
+  $('.holder.container-fluid').removeClass('is-organization');
+
   opening = {
     type: 'app',
     id: appId
@@ -451,12 +553,16 @@ function openApp(appId) {
 
       renderFolderContent(response);
       updatePaths();
+      toggleStorageUsage();
+
       $spinnerHolder.addClass('hidden');
     });
 }
 
 function openOrganization(organizationId) {
   $spinnerHolder.removeClass('hidden');
+  $('.holder.container-fluid').addClass('is-organization');
+
   opening = {
     type: 'organization',
     id: organizationId
@@ -471,6 +577,8 @@ function openOrganization(organizationId) {
 
       renderFolderContent(response);
       updatePaths();
+      toggleStorageUsage();
+
       $spinnerHolder.addClass('hidden');
     });
 }
@@ -960,6 +1068,16 @@ function renderOrganization(id) {
   openOrganization(id);
 }
 
+function setOrganizationType() {
+  var currentOrganization = _.find(userOrganizations, function(org) {
+    return org.id === Fliplet.Env.get('organizationId');
+  });
+  var organizationPlan = _.get(currentOrganization, 'settings.plan', {});
+
+  organizationIsSelfServe = ['enterprise', 'bronze', 'silver', 'gold', 'platinum']
+    .indexOf(organizationPlan.name) < 0;
+}
+
 function init() {
   Handlebars.registerHelper('formatName', function(fileName) {
     return fileName.length > 55 ? fileName.substring(0, 20) + '...' + fileName.substring(fileName.length - 20) : fileName;
@@ -971,27 +1089,30 @@ function init() {
     getApps()
   ])
     .then(function(values) {
-      var userOrganisations = values[0];
-      var userApps = values[1];
-      let dropDownHtml = [];
-      var thisOrganisation = _.find(userOrganisations, function(org) {
+      userOrganizations = values[0];
+      userApps = values[1];
+
+      setOrganizationType();
+
+      var dropDownHtml = [];
+      var thisOrganization = _.find(userOrganizations, function(org) {
         return org.id === Fliplet.Env.get('organizationId');
       });
       var thisApp = _.find(userApps, function(app) {
         return app.id === Fliplet.Env.get('appId');
       });
 
-      // Organisations
-      if (thisOrganisation) {
-        if (data.allowOrganisationFolder) {
-          dropDownHtml.push('<optgroup label="--- Organisation ---">');
-          dropDownHtml.push('<option value="org_' + thisOrganisation.id + '">' + thisOrganisation.name + '</option>');
+      // Organizations
+      if (thisOrganization) {
+        if (data.allowOrganizationFolder) {
+          dropDownHtml.push('<optgroup label="--- Organization ---">');
+          dropDownHtml.push('<option value="org_' + thisOrganization.id + '">' + thisOrganization.name + '</option>');
           dropDownHtml.push('</optgroup>');
         }
 
         organizations.push({
-          id: thisOrganisation.id,
-          name: thisOrganisation.name
+          id: thisOrganization.id,
+          name: thisOrganization.name
         });
       }
 
@@ -1004,6 +1125,8 @@ function init() {
           id: thisApp.id,
           name: thisApp.name
         });
+
+        currentAppId = thisApp.id;
       }
 
       $fileDropDown.append(dropDownHtml.join(''));
@@ -1017,6 +1140,8 @@ function init() {
         var dataAttr = $fileDropDown.val().split('_');
         var type = dataAttr[0];
         var id = parseInt(dataAttr[1], 10);
+
+        currentAppId = type === 'app' ? id : '';
 
         switch (type) {
           case 'app':
@@ -1045,6 +1170,11 @@ Fliplet.Studio.onMessage(function(event) {
 
   if (data.event === 'overlay-close' && data.title === 'File Manager') {
     upTo[upTo.length - 1].back();
+
+    updateAppMetrics()
+      .then(function () {
+        toggleStorageUsage();
+      });
   }
 });
 
@@ -1158,6 +1288,7 @@ function uploadFiles(files) {
   var confirmedType;
   var confirmedExt;
   var formData = new FormData();
+
   for (var i = 0; i < files.length; i++) {
     var fileName = files[i].name;
     var dotIndex = fileName.lastIndexOf('.');
@@ -1221,6 +1352,7 @@ function uploadFiles(files) {
       if (files.length) {
         addFilesToCurrentFiles(files);
       }
+
       if (data.autoSelectOnUpload) {
         files.forEach(function(file) {
           if (selectAvailable) {
@@ -1228,19 +1360,33 @@ function uploadFiles(files) {
           }
         });
       }
+
       hideProgressBar();
+
+      return updateAppMetrics();
     })
-    .then(function() {}, handleUploadingError);
+    .then(function() {
+      toggleStorageUsage();
+    })
+    .catch(handleUploadingError);
 }
 
-function handleUploadingError() {
+function handleUploadingError(error) {
   hideProgressBar();
+
   if (isCancelClicked) return;
-  showError();
+
+  showError(Fliplet.parseError(
+    error,
+    'There was an error while uploading your file. Please try again.'
+  ));
 }
 
-function showError() {
+function showError(errorMessage) {
+  $alertMessage.text(errorMessage);
+
   $alertWrapper.show();
+
   setTimeout(function() {
     $alertWrapper.hide();
   }, 3000);
