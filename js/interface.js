@@ -206,7 +206,7 @@ function formatBytes(bytes, decimals = 2) {
 }
 
 function getFilteredType(extension) {
-  var fileExtension = _.find(validExtensions, function(valid) {
+  var fileExtension = Fliplet.Utils.find(validExtensions, function(valid) {
     return valid.ext === extension;
   });
   extension = extension.toLowerCase();
@@ -322,7 +322,7 @@ $(document)
         displayDeletionConfirmation('file', fileID).then(function() {
           $elementToDelete.remove();
 
-          _.remove(files, { id: fileID });
+          Fliplet.Utils.remove(files, { id: fileID });
         });
       });
 
@@ -347,7 +347,7 @@ $(document)
         displayDeletionConfirmation('folder', folderID).then(function() {
           $elementToDelete.remove();
 
-          _.remove(folders, { id: folderID });
+          Fliplet.Utils.remove(folders, { id: folderID });
         });
       });
 
@@ -487,7 +487,7 @@ function toggleStorageUsage() {
   }
 
   // Get the selected app
-  var selectedApp = _.find(userApps, function(app) {
+  var selectedApp = Fliplet.Utils.find(userApps, function(app) {
     return app.id === currentAppId;
   });
 
@@ -661,7 +661,7 @@ function unselectAll() {
 
 function selectFile(id) {
   if (data.type === 'folder') return;
-  var file = _.find(files, function(file) {
+  var file = Fliplet.Utils.find(files, function(file) {
     return file.id === id;
   });
   if (!file) return;
@@ -681,7 +681,7 @@ function selectFile(id) {
 function selectFolder(id) {
   if (!(data.type === 'folder' || data.type === '')) return;
 
-  var folder = _.find(folders, function(folder) {
+  var folder = Fliplet.Utils.find(folders, function(folder) {
     return folder.id === id;
   });
   if (!folder) return;
@@ -715,16 +715,16 @@ function selectItems(items) {
 function restoreRoot(appId, organizationId) {
   var backItem;
 
-  if (appId && _.find(apps, ['id', appId])) {
-    backItem = _.find(apps, ['id', appId]);
+  if (appId && Fliplet.Utils.find(apps, ['id', appId])) {
+    backItem = Fliplet.Utils.find(apps, ['id', appId]);
     backItem.back = function() {
       return openApp(appId);
     };
     backItem.name = 'Root';
     backItem.type = 'appId';
     initDropDownState('app_' + appId);
-  } else if (organizationId && _.find(organizations, ['id', organizationId])) {
-    backItem = _.find(organizations, ['id', organizationId]);
+  } else if (organizationId && Fliplet.Utils.find(organizations, ['id', organizationId])) {
+    backItem = Fliplet.Utils.find(organizations, ['id', organizationId]);
     backItem.back = function() {
       return openOrganization(organizationId);
     };
@@ -913,7 +913,7 @@ function onFolderDbClick(e) {
   var backItem;
 
   // Store to nav stack
-  backItem = _.find(folders, ['id', id]);
+  backItem = Fliplet.Utils.find(folders, ['id', id]);
   backItem.back = function() {
     return openFolder(id);
   };
@@ -1013,7 +1013,7 @@ function initDropDownState(id) {
 function defaultInitWidgetState() {
   forceDropDownInit = false;
 
-  if (_.find(apps, function(app) {
+  if (Fliplet.Utils.find(apps, function(app) {
     return app.id === Fliplet.Env.get('appId');
   })) {
     initDropDownState('app_' + Fliplet.Env.get('appId'));
@@ -1031,7 +1031,7 @@ function defaultInitWidgetState() {
 function initWidgetState() {
   forceDropDownInit = true;
 
-  if (_.isEmpty(data.selectFiles)) {
+  if (Fliplet.Utils.isEmpty(data.selectFiles)) {
     defaultInitWidgetState();
     return;
   }
@@ -1042,7 +1042,7 @@ function initWidgetState() {
 function renderApp(id) {
   var backItem;
 
-  backItem = _.find(apps, ['id', id]);
+  backItem = Fliplet.Utils.find(apps, ['id', id]);
   backItem.name = 'Root';
   backItem.back = function() {
     return openApp(id);
@@ -1056,7 +1056,7 @@ function renderApp(id) {
 function renderOrganization(id) {
   var backItem;
 
-  backItem = _.find(organizations, ['id', id]);
+  backItem = Fliplet.Utils.find(organizations, ['id', id]);
   backItem.name = 'Root';
   backItem.back = function() {
     return openOrganization(id);
@@ -1069,10 +1069,10 @@ function renderOrganization(id) {
 }
 
 function setOrganizationType() {
-  var currentOrganization = _.find(userOrganizations, function(org) {
+  var currentOrganization = Fliplet.Utils.find(userOrganizations, function(org) {
     return org.id === Fliplet.Env.get('organizationId');
   });
-  var organizationPlan = _.get(currentOrganization, 'settings.plan', {});
+  var organizationPlan = Fliplet.Utils.get(currentOrganization, 'settings.plan', {});
 
   organizationIsSelfServe = ['enterprise', 'bronze', 'silver', 'gold', 'platinum']
     .indexOf(organizationPlan.name) < 0;
@@ -1095,10 +1095,10 @@ function init() {
       setOrganizationType();
 
       var dropDownHtml = [];
-      var thisOrganization = _.find(userOrganizations, function(org) {
+      var thisOrganization = Fliplet.Utils.find(userOrganizations, function(org) {
         return org.id === Fliplet.Env.get('organizationId');
       });
-      var thisApp = _.find(userApps, function(app) {
+      var thisApp = Fliplet.Utils.find(userApps, function(app) {
         return app.id === Fliplet.Env.get('appId');
       });
 
@@ -1181,16 +1181,16 @@ Fliplet.Studio.onMessage(function(event) {
 function cleanNavStack() {
   var newUpTo = upTo.slice();
   newUpTo.forEach(function(obj, idx) {
-    newUpTo[idx] = _.omit(obj, ['back']);
+    newUpTo[idx] = Fliplet.Utils.omit(obj, ['back']);
   });
 
   return newUpTo;
 }
 
 Fliplet.Widget.onSaveRequest(function() {
-  var data = _.map(getSelectedData(), function(file) {
+  var data = Fliplet.Utils.map(getSelectedData(), function(file) {
     // Remove irrelevant or volatile information before saving
-    _.omit(file, [
+    Fliplet.Utils.omit(file, [
       'createdAt', 'updatedAt', 'deletedAt', 'appId',
       'masterMediaFolderId', 'parentId', 'organizationId'
     ]);
@@ -1294,12 +1294,12 @@ function uploadFiles(files) {
     var dotIndex = fileName.lastIndexOf('.');
     var extension = fileName.substring(dotIndex).toLowerCase();
 
-    confirmedType = _.find(validType[data.type].mimetype, function(type) {
+    confirmedType = Fliplet.Utils.find(validType[data.type].mimetype, function(type) {
       return type === files[i].type;
     });
 
     if (!confirmedType) {
-      confirmedExt = _.find(extensionDictionary[data.type], function(ext) {
+      confirmedExt = Fliplet.Utils.find(extensionDictionary[data.type], function(ext) {
         return '.' + ext === extension;
       });
 
@@ -1437,8 +1437,8 @@ function drawContentItems() {
   }
 
   $imagesContainer.empty();
-  _.sortBy(folders, byLowerCaseName).forEach(addFolder);
-  _.sortBy(files, byLowerCaseName).forEach(addFile);
+  Fliplet.Utils.sortBy(folders, byLowerCaseName).forEach(addFolder);
+  Fliplet.Utils.sortBy(files, byLowerCaseName).forEach(addFile);
 
   Fliplet.Widget.autosize();
 }
