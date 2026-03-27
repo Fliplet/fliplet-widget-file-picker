@@ -18,7 +18,7 @@ var data = Fliplet.Widget.getData() || {};
 var currentAppId;
 
 data.type = data.type || '';
-data.selectFiles = data.selectFiles || [];
+data.selectFiles = (typeof data.selectFiles === 'object' && data.selectFiles) ? data.selectFiles : [];
 
 Fliplet.Widget.toggleSaveButton(data.selectFiles.length);
 
@@ -1288,36 +1288,41 @@ function uploadFiles(files) {
   var confirmedType;
   var confirmedExt;
   var formData = new FormData();
+  var hasTypeFilter = data.type && validType[data.type];
 
   for (var i = 0; i < files.length; i++) {
     var fileName = files[i].name;
     var dotIndex = fileName.lastIndexOf('.');
     var extension = fileName.substring(dotIndex).toLowerCase();
 
-    confirmedType = _.find(validType[data.type].mimetype, function(type) {
-      return type === files[i].type;
-    });
-
-    if (!confirmedType) {
-      confirmedExt = _.find(extensionDictionary[data.type], function(ext) {
-        return '.' + ext === extension;
+    if (!hasTypeFilter) {
+      confirmedType = true;
+    } else {
+      confirmedType = _.find(validType[data.type].mimetype, function(type) {
+        return type === files[i].type;
       });
 
-      if (!confirmedExt) {
-        handleUploadingWrongFile();
-        break;
-      }
-    } else if (data.fileExtension.length) {
-      var isFileExtensionApproved = data.fileExtension.some(function(ext) {
-        return extension === '.' + ext.toLowerCase();
-      });
-      /**
-       * if type was found in our valid types and fileExtension configuration was passed
-       * check if the file is from the correct fileExtension
-       */
-      if (!isFileExtensionApproved) {
-        handleUploadingWrongFile();
-        break;
+      if (!confirmedType) {
+        confirmedExt = _.find(extensionDictionary[data.type], function(ext) {
+          return '.' + ext === extension;
+        });
+
+        if (!confirmedExt) {
+          handleUploadingWrongFile();
+          break;
+        }
+      } else if (data.fileExtension.length) {
+        var isFileExtensionApproved = data.fileExtension.some(function(ext) {
+          return extension === '.' + ext.toLowerCase();
+        });
+        /**
+         * if type was found in our valid types and fileExtension configuration was passed
+         * check if the file is from the correct fileExtension
+         */
+        if (!isFileExtensionApproved) {
+          handleUploadingWrongFile();
+          break;
+        }
       }
     }
 
